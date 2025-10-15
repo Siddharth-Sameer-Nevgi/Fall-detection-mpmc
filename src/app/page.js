@@ -1,12 +1,46 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import styles from "./page.module.css";
 import Header from "../components/Header";
 import ProtectedRoute from "../components/ProtectedRoute";
+import DeviceStatus from "../components/DeviceStatus";
+import EmergencyContacts from "../components/EmergencyContacts";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Home() {
   const { user } = useAuth();
+  const [emergencyContacts, setEmergencyContacts] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (user?._id) {
+      fetchEmergencyContacts();
+    }
+  }, [user]);
+
+  const fetchEmergencyContacts = async () => {
+    try {
+      const response = await fetch(`/api/emergency-contacts?userId=${user._id}`);
+      const data = await response.json();
+      
+      if (response.ok) {
+        setEmergencyContacts(data.contacts);
+      }
+    } catch (error) {
+      console.error('Failed to fetch emergency contacts:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleContactAdded = (newContact) => {
+    setEmergencyContacts(prev => [...prev, newContact]);
+  };
+
+  const handleContactDeleted = (contactId) => {
+    setEmergencyContacts(prev => prev.filter(contact => contact._id !== contactId));
+  };
 
   return (
     <ProtectedRoute>
@@ -18,29 +52,26 @@ export default function Home() {
               Welcome to Fall Detection System
             </h1>
             <p className={styles.welcomeText}>
-              Device ID: <strong>{user?.deviceId}</strong>
-            </p>
-            <p className={styles.welcomeText}>
               User: <strong>{user?.email}</strong>
             </p>
           </div>
 
-          <div className={styles.featuresGrid}>
-            <div className={styles.featureCard}>
-              <h3>Real-time Monitoring</h3>
-              <p>Continuous monitoring of device sensors for fall detection</p>
+          <div className={styles.dashboardGrid}>
+            <div className={styles.leftPanel}>
+              {user?._id && (
+                <DeviceStatus userId={user._id} />
+              )}
             </div>
-            <div className={styles.featureCard}>
-              <h3>Instant Alerts</h3>
-              <p>Immediate notifications when a fall is detected</p>
-            </div>
-            <div className={styles.featureCard}>
-              <h3>Data Analytics</h3>
-              <p>View historical data and patterns</p>
-            </div>
-            <div className={styles.featureCard}>
-              <h3>Emergency Contacts</h3>
-              <p>Automatic emergency contact notifications</p>
+            
+            <div className={styles.rightPanel}>
+              {user?._id && (
+                <EmergencyContacts
+                  userId={user._id}
+                  contacts={emergencyContacts}
+                  onContactAdded={handleContactAdded}
+                  onContactDeleted={handleContactDeleted}
+                />
+              )}
             </div>
           </div>
 

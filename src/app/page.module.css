@@ -37,6 +37,23 @@
   margin-bottom: 10px;
 }
 
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-bottom: 40px;
+}
+
+.leftPanel {
+  display: flex;
+  flex-direction: column;
+}
+
+.rightPanel {
+  display: flex;
+  flex-direction: column;
+}
+
 .featuresGrid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -122,6 +139,11 @@
   
   .welcomeTitle {
     font-size: 2rem;
+  }
+  
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+    gap: 20px;
   }
   
   .featuresGrid {
